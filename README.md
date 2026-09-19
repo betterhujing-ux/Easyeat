@@ -1,11 +1,33 @@
-<div align="center">
+# 极简食谱与饮食记录 (Diet & Recipe Tracker)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+极简纯净、无冗余视觉杂质的减脂食谱与日常饮食营养记录应用。内置营养数据库，支持自建食谱与每日三大营养素及热量摄入追踪。
 
-  <h1>Built with AI Studio</h2>
+## 特性
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- **严格模块隔离**：
+  - **食谱库**：分类检索减脂快手食谱、单份营养估算（热量/蛋白质/碳水/脂肪）、食材克重与烹饪步骤，支持新建/删除个人自建食谱。
+  - **饮食记录**：独立按日记账，支持按早/午/晚/加餐分类、内置食物营养成分检索、实时计算三大营养素达标环形进度。
+- **纯净排版与高屏效**：
+  - 采用 `#FAFAFA` 浅灰底色搭配白色超轻量卡片（0.5px 极细边框）。
+  - 纯白底部导航栏，直观切换模块。
+- **本地持久化**：
+  - 基于 LocalStorage 存储自建食谱与每日饮食日志，离线即开即用。
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## 技术栈
 
-</div>
+- **前端**：React 18 + TypeScript + Vite
+- **样式**：Tailwind CSS
+- **动效与交互**：可访问性支持 (WCAG AA)
+
+## 本地运行
+
+```bash
+# 1. 安装依赖
+npm install
+
+# 2. 启动开发服务器 (默认端口 3000)
+npm run dev
+
+# 3. 生产环境构建
+npm run build
+```
