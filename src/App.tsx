@@ -17,7 +17,7 @@ import { RecipeEditor } from './components/RecipeEditor';
 import { DietTracker } from './components/DietTracker';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('recipes');
+  const [currentTab, setCurrentTab] = useState<NavTab>('tracker');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
@@ -63,21 +63,21 @@ export default function App() {
     setRecipes(getAllRecipes());
     setIsCreatingRecipe(false);
     setActiveRecipe(newRecipe);
-    showToast(`已成功保存自建菜谱《${newRecipe.title}》`);
+    showToast(`已为你保存好《${newRecipe.title}》`);
   };
 
   const handleDeleteCustomRecipe = (id: string) => {
     deleteCustomRecipe(id);
     setRecipes(getAllRecipes());
     setActiveRecipe(null);
-    showToast('自建菜谱已删除');
+    showToast('已移除该食谱');
   };
 
   // Tracker actions
   const handleAddLogItem = (item: LoggedItem) => {
     const updated = addLogItem(currentDate, item);
     setDailyLogs(updated);
-    showToast(`已记录：${item.name} (${item.amount}g)`);
+    showToast(`已记入今日饮食：${item.name} (${item.amount}克)`);
   };
 
   const handleDeleteLogItem = (id: string) => {
@@ -109,7 +109,7 @@ export default function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg transition-all animate-fadeIn"
+          className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-semibold px-4 py-2 rounded-full border border-neutral-800 transition-all animate-fadeIn"
         >
           {bannerNotice}
         </div>
@@ -119,19 +119,28 @@ export default function App() {
       <main id="main-content" className="max-w-xl mx-auto px-4 pt-5 pb-24">
         {/* App Header (Shows unless deeply reading recipe detail) */}
         {!activeRecipe && !isCreatingRecipe && (
-          <header className="mb-4 space-y-0.5">
+          <header className="mb-4">
             <h1 className="text-xl font-bold tracking-tight text-neutral-950">
-              {currentTab === 'recipes' && '健康食谱'}
               {currentTab === 'tracker' && '饮食记录'}
+              {currentTab === 'recipes' && '健康食谱'}
             </h1>
-            <p className="text-xs text-neutral-400">
-              {currentTab === 'recipes' && '精选健康膳食灵感与自建食谱'}
-              {currentTab === 'tracker' && '记录每日三餐与营养摄入'}
-            </p>
           </header>
         )}
 
-        {/* Dynamic Views */}
+        {/* Dynamic Views: 记录页为主页面 */}
+        {currentTab === 'tracker' && (
+          <div id="tracker-tab-panel" role="tabpanel" aria-labelledby="nav-tab-tracker">
+            <DietTracker
+              currentDate={currentDate}
+              logs={dailyLogs}
+              targets={dailyTargets}
+              onDateChange={setCurrentDate}
+              onAddLog={handleAddLogItem}
+              onDeleteLog={handleDeleteLogItem}
+            />
+          </div>
+        )}
+
         {currentTab === 'recipes' && (
           <div id="recipes-tab-panel" role="tabpanel" aria-labelledby="nav-tab-recipes">
             {isCreatingRecipe ? (
@@ -152,19 +161,6 @@ export default function App() {
                 onCreateNew={() => setIsCreatingRecipe(true)}
               />
             )}
-          </div>
-        )}
-
-        {currentTab === 'tracker' && (
-          <div id="tracker-tab-panel" role="tabpanel" aria-labelledby="nav-tab-tracker">
-            <DietTracker
-              currentDate={currentDate}
-              logs={dailyLogs}
-              targets={dailyTargets}
-              onDateChange={setCurrentDate}
-              onAddLog={handleAddLogItem}
-              onDeleteLog={handleDeleteLogItem}
-            />
           </div>
         )}
       </main>

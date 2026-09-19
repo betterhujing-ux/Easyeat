@@ -22,16 +22,36 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* 0.5px hairline card border for ultra-crisp display */
+  /* Savee aesthetic: 0.5px ultra-crisp hairline border (#E0E0E0) */
   .card-border {
-    border-width: 1px;
-    border-color: #E8E8E8;
+    border: 1px solid #E0E0E0;
   }
-  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
     .card-border {
-      border-width: 0.5px;
-      border-color: #E0E0E0;
+      border: 0.5px solid #E0E0E0;
     }
+  }
+
+  .border-hairline-t {
+    border-top: 1px solid #E0E0E0;
+  }
+  @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+    .border-hairline-t {
+      border-top: 0.5px solid #E0E0E0;
+    }
+  }
+
+  .border-hairline-b {
+    border-bottom: 1px solid #E0E0E0;
+  }
+  @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+    .border-hairline-b {
+      border-bottom: 0.5px solid #E0E0E0;
+    }
+  }
+
+  .divide-hairline > * + * {
+    border-color: #E0E0E0;
   }
 
   /* Accessibility: Accessible focus indicators per Front-End Checklist */

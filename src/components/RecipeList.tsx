@@ -7,7 +7,7 @@ interface RecipeListProps {
   onCreateNew: () => void;
 }
 
-const CATEGORIES = ['全部', '高蛋白', '低脂正餐', '低卡暖汤', '轻食沙拉', '我的自建'];
+const CATEGORIES = ['全部', '高蛋白', '低脂正餐', '低卡暖汤', '轻食沙拉', '我的私房'];
 
 export const RecipeList: React.FC<RecipeListProps> = ({
   recipes,
@@ -21,7 +21,7 @@ export const RecipeList: React.FC<RecipeListProps> = ({
     const matchesCategory =
       selectedCategory === '全部'
         ? true
-        : selectedCategory === '我的自建'
+        : selectedCategory === '我的私房'
         ? recipe.isCustom
         : recipe.category === selectedCategory;
 
@@ -66,7 +66,20 @@ export const RecipeList: React.FC<RecipeListProps> = ({
 
       {/* Search Bar */}
       <div className="space-y-2.5">
-        <div className="relative">
+        <div className="relative flex items-center">
+          <svg
+            className="w-4 h-4 text-neutral-400 absolute left-3.5 pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
           <label htmlFor="recipe-search-input" className="sr-only">
             搜索食材或食谱名称
           </label>
@@ -80,25 +93,35 @@ export const RecipeList: React.FC<RecipeListProps> = ({
             spellCheck="false"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="搜索食材或食谱名称（如：鸡胸肉、沙拉）"
-            className="w-full bg-white card-border text-neutral-900 placeholder:text-neutral-400 text-xs rounded-xl px-3.5 py-2.5 outline-none transition-all focus:border-black focus:ring-1 focus:ring-black"
+            placeholder="想吃点什么？搜索食材或菜名（如：鸡胸肉、沙拉）"
+            className="w-full bg-white border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-xs rounded-full pl-10 pr-10 py-2.5 outline-none transition-all focus:border-black focus:ring-1 focus:ring-black [appearance:none] [-webkit-appearance:none]"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="清空搜索内容"
+              className="absolute right-3 text-neutral-400 hover:text-black p-1 text-xs"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Section Header: Count and Action */}
         <div className="flex items-center justify-between px-0.5">
           <span aria-live="polite" className="text-xs text-neutral-400 tracking-tight">
-            共 {filteredRecipes.length} 道健康食谱
+            共 {filteredRecipes.length} 道健康美味
           </span>
           <button
             id="btn-create-recipe"
             type="button"
             onClick={onCreateNew}
-            aria-label="自建新菜谱"
+            aria-label="记私房食谱"
             className="text-xs font-semibold text-neutral-900 bg-white card-border hover:border-neutral-400 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 min-h-[32px]"
           >
             <span aria-hidden="true">+</span>
-            <span>自建新菜谱</span>
+            <span>记私房食谱</span>
           </button>
         </div>
       </div>
@@ -107,8 +130,8 @@ export const RecipeList: React.FC<RecipeListProps> = ({
       <div className="space-y-3" role="feed" aria-label="食谱列表">
         {filteredRecipes.length === 0 ? (
           <div className="bg-white card-border rounded-xl p-8 text-center space-y-1.5" role="status">
-            <p className="text-sm font-semibold text-neutral-800">未找到相关食谱</p>
-            <p className="text-xs text-neutral-400">试试更换关键词或点击上方按钮自建新菜谱</p>
+            <p className="text-sm font-semibold text-neutral-800">未找到符合的食谱</p>
+            <p className="text-xs text-neutral-400">试试换个食材名称，或者亲手记下一道你的私房食谱</p>
           </div>
         ) : (
           filteredRecipes.map(recipe => (
@@ -134,7 +157,7 @@ export const RecipeList: React.FC<RecipeListProps> = ({
                 </h3>
                 {recipe.isCustom && (
                   <span className="text-[10px] font-semibold bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded shrink-0">
-                    自建
+                    私房
                   </span>
                 )}
               </div>
@@ -145,7 +168,7 @@ export const RecipeList: React.FC<RecipeListProps> = ({
               </p>
 
               {/* Footer Metadata: Separated with clear divider and proportional spacing */}
-              <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-neutral-100 text-xs">
+              <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[#E0E0E0] text-xs">
                 <div className="flex items-center gap-2 text-[11px] text-neutral-400">
                   <span>{recipe.prepMinutes} 分钟</span>
                   <span className="text-neutral-200">·</span>

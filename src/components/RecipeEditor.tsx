@@ -120,11 +120,11 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
         >
           取消
         </button>
-        <h2 className="text-sm font-bold text-neutral-900">自建新菜谱</h2>
+        <h2 className="text-sm font-bold text-neutral-900">记录私房食谱</h2>
         <div className="w-12" />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4" aria-label="创建新菜谱表单">
+      <form onSubmit={handleSubmit} className="space-y-4" aria-label="创建私房食谱表单">
         {/* Base Info */}
         <div className="bg-white card-border rounded-xl p-4 space-y-3">
           <div>
@@ -139,7 +139,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="例如：少油黑椒鸡胸肉丸"
-              className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-3 py-2 outline-none focus:border-black transition-colors"
+              className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-3 py-2 outline-none focus:border-black transition-colors"
             />
           </div>
 
@@ -153,7 +153,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
               value={summary}
               onChange={e => setSummary(e.target.value)}
               placeholder="简述这道菜的特点，如：口感脆嫩、高蛋白快手..."
-              className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-3 py-2 outline-none focus:border-black resize-none transition-colors"
+              className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-3 py-2 outline-none focus:border-black resize-none transition-colors"
             />
           </div>
 
@@ -164,7 +164,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                 id="editor-recipe-category"
                 value={category}
                 onChange={e => setCategory(e.target.value)}
-                className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
+                className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
               >
                 <option value="高蛋白">高蛋白</option>
                 <option value="低脂正餐">低脂正餐</option>
@@ -184,7 +184,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                 max="600"
                 value={prepMinutes}
                 onChange={e => setPrepMinutes(Number(e.target.value))}
-                className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
+                className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
               />
             </div>
 
@@ -194,7 +194,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                 id="editor-recipe-difficulty"
                 value={difficulty}
                 onChange={e => setDifficulty(e.target.value as any)}
-                className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
+                className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2 py-1.5 outline-none min-h-[34px] focus:border-black"
               >
                 <option value="简单">简单</option>
                 <option value="适中">适中</option>
@@ -205,24 +205,28 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
         </div>
 
         {/* Nutritional Summary Preview */}
-        <div className="bg-neutral-950 text-white rounded-xl p-3.5 space-y-1.5" aria-label="整道菜营养成分预估">
-          <div className="text-[11px] text-neutral-400">整道菜营养预估</div>
-          <div className="grid grid-cols-4 gap-2 text-center pt-1">
-            <div>
-              <div className="text-base font-bold">{totalCal}</div>
-              <div className="text-[10px] text-neutral-400">千卡</div>
+        <div className="bg-white card-border rounded-xl p-4 space-y-2" aria-label="全道菜参考营养">
+          <div className="text-[11px] text-neutral-400 font-medium">全道菜参考营养</div>
+          <div className="grid grid-cols-4 divide-x divide-[#E0E0E0] py-1 text-center">
+            <div className="px-1">
+              <span className="block text-[11px] text-neutral-400 font-medium">热量</span>
+              <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{totalCal}</span>
+              <span className="block text-[10px] text-neutral-400">千卡</span>
             </div>
-            <div>
-              <div className="text-base font-bold">{totalProtein}</div>
-              <div className="text-[10px] text-neutral-400">蛋白质(g)</div>
+            <div className="px-1">
+              <span className="block text-[11px] text-neutral-400 font-medium">蛋白质</span>
+              <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{totalProtein}</span>
+              <span className="block text-[10px] text-neutral-400">克</span>
             </div>
-            <div>
-              <div className="text-base font-bold">{totalCarbs}</div>
-              <div className="text-[10px] text-neutral-400">碳水(g)</div>
+            <div className="px-1">
+              <span className="block text-[11px] text-neutral-400 font-medium">碳水</span>
+              <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{totalCarbs}</span>
+              <span className="block text-[10px] text-neutral-400">克</span>
             </div>
-            <div>
-              <div className="text-base font-bold">{totalFat}</div>
-              <div className="text-[10px] text-neutral-400">脂肪(g)</div>
+            <div className="px-1">
+              <span className="block text-[11px] text-neutral-400 font-medium">脂肪</span>
+              <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{totalFat}</span>
+              <span className="block text-[10px] text-neutral-400">克</span>
             </div>
           </div>
         </div>
@@ -230,13 +234,13 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
         {/* Ingredients */}
         <div className="bg-white card-border rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-900">食材配比</span>
+            <span className="text-xs font-bold text-neutral-900">所需食材</span>
             <button
               type="button"
               onClick={handleAddIngredient}
               className="text-xs font-semibold text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded-md min-h-[30px]"
             >
-              + 增加食材
+              + 添加食材
             </button>
           </div>
 
@@ -249,7 +253,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                   aria-label={`第 ${idx + 1} 种食材名称`}
                   value={ing.name}
                   onChange={e => handleIngredientChange(idx, 'name', e.target.value)}
-                  className="flex-1 bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none min-h-[34px] focus:border-black"
+                  className="flex-1 bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none min-h-[34px] focus:border-black"
                 />
                 <input
                   type="number"
@@ -258,7 +262,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                   aria-label={`第 ${idx + 1} 种食材克数`}
                   value={ing.amount}
                   onChange={e => handleIngredientChange(idx, 'amount', Number(e.target.value))}
-                  className="w-16 bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-1.5 py-1.5 text-center outline-none min-h-[34px] focus:border-black"
+                  className="w-16 bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-1.5 py-1.5 text-center outline-none min-h-[34px] focus:border-black"
                 />
                 <span className="text-xs text-neutral-400 w-5">{ing.unit}</span>
                 <button
@@ -277,13 +281,13 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
         {/* Steps */}
         <div className="bg-white card-border rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-900">烹饪步骤</span>
+            <span className="text-xs font-bold text-neutral-900">制作步骤</span>
             <button
               type="button"
               onClick={handleAddStep}
               className="text-xs font-semibold text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded-md min-h-[30px]"
             >
-              + 增加步骤
+              + 添加制作步骤
             </button>
           </div>
 
@@ -299,7 +303,7 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
                   aria-label={`第 ${idx + 1} 步说明`}
                   value={step}
                   onChange={e => handleStepChange(idx, e.target.value)}
-                  className="flex-1 bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none focus:border-black"
+                  className="flex-1 bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none focus:border-black"
                 />
                 <button
                   type="button"
@@ -316,23 +320,23 @@ export const RecipeEditor: React.FC<RecipeEditorProps> = ({ onSave, onCancel }) 
 
         {/* Tips */}
         <div className="bg-white card-border rounded-xl p-4 space-y-1.5">
-          <label htmlFor="editor-recipe-tips" className="block text-xs font-bold text-neutral-800">烹饪要点 (选填)</label>
+          <label htmlFor="editor-recipe-tips" className="block text-xs font-bold text-neutral-800">制作心得与贴士 (选填)</label>
           <textarea
             id="editor-recipe-tips"
             rows={2}
             value={tips}
             onChange={e => setTips(e.target.value)}
             placeholder="例如：肉片逆纹切更嫩，出锅前淋少许柠檬汁去腥..."
-            className="w-full bg-[#FAFAFA] border border-neutral-200 text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none focus:border-black"
+            className="w-full bg-white border border-[#E0E0E0] text-neutral-900 text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none focus:border-black"
           />
         </div>
 
         {/* Save button */}
         <button
           type="submit"
-          className="w-full bg-black text-white font-bold text-xs py-2.5 rounded-xl hover:bg-neutral-800 transition-colors shadow-sm min-h-[40px]"
+          className="w-full bg-black text-white font-bold text-xs py-2.5 rounded-xl hover:bg-neutral-800 transition-colors min-h-[40px]"
         >
-          保存此自建菜谱
+          保存这份私房食谱
         </button>
       </form>
     </div>

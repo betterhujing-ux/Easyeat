@@ -26,23 +26,23 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
           <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          <span>返回食谱库</span>
+          <span>返回食谱列表</span>
         </button>
 
         {recipe.isCustom && onDeleteCustom && (
           <button
             id="btn-recipe-delete"
             type="button"
-            aria-label={`删除自建食谱《${recipe.title}》`}
+            aria-label={`移除这道私房菜《${recipe.title}》`}
             onClick={() => {
-              if (window.confirm(`确认删除自建食谱《${recipe.title}》吗？`)) {
+              if (window.confirm(`确定要移除这道私房菜《${recipe.title}》吗？`)) {
                 onDeleteCustom(recipe.id);
                 onBack();
               }
             }}
             className="text-xs text-neutral-400 hover:text-red-600 transition-colors py-1.5 px-2"
           >
-            删除此自建食谱
+            移除这道私房菜
           </button>
         )}
       </div>
@@ -67,43 +67,43 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
       </header>
 
       {/* Nutrition Breakdown Block */}
-      <section className="bg-white card-border rounded-xl p-4 space-y-3" aria-label="单份营养成分">
+      <section className="bg-white card-border rounded-xl p-4 space-y-3" aria-label="单份营养搭配">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold text-neutral-900 tracking-wider">营养成分 (单份)</h2>
-          <span className="text-xs text-neutral-400">营养成分预估</span>
+          <h2 className="text-xs font-bold text-neutral-900 tracking-wider">营养搭配 (每份)</h2>
+          <span className="text-xs text-neutral-400">参考摄入</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 pt-0.5">
-          <div className="bg-[#FAFAFA] border border-neutral-100 rounded-lg py-2.5 px-1 text-center">
-            <span className="block text-[11px] text-neutral-400">热量</span>
-            <span className="block text-base font-extrabold text-neutral-950 my-0.5">{recipe.totalCal}</span>
+        <div className="grid grid-cols-4 divide-x divide-[#E0E0E0] py-1 text-center">
+          <div className="px-1">
+            <span className="block text-[11px] text-neutral-400 font-medium">热量</span>
+            <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{recipe.totalCal}</span>
             <span className="block text-[10px] text-neutral-400">千卡</span>
           </div>
-          <div className="bg-[#FAFAFA] border border-neutral-100 rounded-lg py-2.5 px-1 text-center">
-            <span className="block text-[11px] text-neutral-400">蛋白质</span>
-            <span className="block text-base font-extrabold text-neutral-950 my-0.5">{recipe.totalProtein}</span>
+          <div className="px-1">
+            <span className="block text-[11px] text-neutral-400 font-medium">蛋白质</span>
+            <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{recipe.totalProtein}</span>
             <span className="block text-[10px] text-neutral-400">克</span>
           </div>
-          <div className="bg-[#FAFAFA] border border-neutral-100 rounded-lg py-2.5 px-1 text-center">
-            <span className="block text-[11px] text-neutral-400">碳水</span>
-            <span className="block text-base font-extrabold text-neutral-950 my-0.5">{recipe.totalCarbs}</span>
+          <div className="px-1">
+            <span className="block text-[11px] text-neutral-400 font-medium">碳水</span>
+            <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{recipe.totalCarbs}</span>
             <span className="block text-[10px] text-neutral-400">克</span>
           </div>
-          <div className="bg-[#FAFAFA] border border-neutral-100 rounded-lg py-2.5 px-1 text-center">
-            <span className="block text-[11px] text-neutral-400">脂肪</span>
-            <span className="block text-base font-extrabold text-neutral-950 my-0.5">{recipe.totalFat}</span>
+          <div className="px-1">
+            <span className="block text-[11px] text-neutral-400 font-medium">脂肪</span>
+            <span className="block text-base font-bold text-neutral-950 my-0.5 tracking-tight">{recipe.totalFat}</span>
             <span className="block text-[10px] text-neutral-400">克</span>
           </div>
         </div>
       </section>
 
       {/* Ingredients List */}
-      <section className="bg-white card-border rounded-xl p-4 space-y-2.5" aria-label="准备食材">
-        <h2 className="text-xs font-bold text-neutral-900 tracking-tight">准备食材</h2>
+      <section className="bg-white card-border rounded-xl p-4 space-y-2.5" aria-label="食材清单">
+        <h2 className="text-xs font-bold text-neutral-900 tracking-tight">需要准备的食材</h2>
 
         <ul className="space-y-1 list-none m-0 p-0">
           {recipe.ingredients.map((ing, idx) => (
-            <li key={idx} className="flex items-center justify-between py-1.5 border-b border-neutral-100/60 last:border-0">
+            <li key={idx} className="flex items-center justify-between py-1.5 border-b border-[#E0E0E0] last:border-0">
               <span className="text-xs text-neutral-800 font-medium">{ing.name}</span>
               <div className="text-right">
                 <span className="text-xs font-semibold text-neutral-900">
@@ -121,8 +121,8 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
       </section>
 
       {/* Cooking Steps */}
-      <section className="bg-white card-border rounded-xl p-4 space-y-3" aria-label="烹饪步骤">
-        <h2 className="text-xs font-bold text-neutral-900 tracking-tight">烹饪步骤</h2>
+      <section className="bg-white card-border rounded-xl p-4 space-y-3" aria-label="制作步骤">
+        <h2 className="text-xs font-bold text-neutral-900 tracking-tight">制作步骤</h2>
 
         <ol className="space-y-3 list-none m-0 p-0">
           {recipe.steps.map((step, idx) => (
@@ -140,14 +140,14 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
 
       {/* Pro Tips / Insights */}
       {recipe.tips && (
-        <section className="bg-[#FAFAFA] card-border rounded-xl p-3.5 space-y-1.5" aria-label="烹饪要点">
+        <section className="bg-white card-border rounded-xl p-3.5 space-y-1.5" aria-label="制作贴士">
           <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900">
             <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
-            <span>烹饪要点</span>
+            <span>主厨贴士</span>
           </div>
           <p className="text-xs text-neutral-600 leading-relaxed">
             {recipe.tips}
