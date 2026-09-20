@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Food, MealType } from '../types';
+import { getMealName } from '../utils/mealUtils';
 import { Search, X, Plus, Edit2 } from './icons';
 
 interface FoodSearchSheetProps {
@@ -12,13 +13,6 @@ interface FoodSearchSheetProps {
   onEditCustom?: (food: Food) => void;
   onClose: () => void;
 }
-
-const MEAL_NAMES: Record<MealType, string> = {
-  breakfast: '早餐',
-  lunch: '午餐',
-  dinner: '晚餐',
-  snack: '加餐',
-};
 
 export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
   isOpen,
@@ -37,9 +31,6 @@ export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
     if (isOpen) {
       setQuery('');
       setFilterType('all');
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
     }
   }, [isOpen]);
 
@@ -61,38 +52,57 @@ export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
 
   if (!isOpen) return null;
 
-  const mealName = MEAL_NAMES[mealType] || '饮食';
+  const mealName = getMealName(mealType);
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="search-sheet-title"
-      className="fixed inset-0 z-40 bg-[#FAFAFA] flex flex-col max-w-xl mx-auto overflow-hidden"
+      className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] animate-backdrop-fade flex flex-col justify-end items-center"
+      onClick={e => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      {/* Header */}
-      <header className="bg-white border-b border-[#E0E0E0] px-4 py-3 flex items-center justify-between shrink-0">
-        <div>
-          <h1 id="search-sheet-title" className="text-sm font-bold text-neutral-900">
+      <div
+        className="w-full max-w-xl h-[80vh] bg-[#FAFAFA] rounded-t-[16px] overflow-hidden flex flex-col animate-sheet-up shadow-none"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Unified Compact Navigation & Search Header */}
+        <header className="bg-white px-4 pt-3 pb-3 space-y-3 shrink-0 rounded-t-[16px]">
+        {/* Top Row: Title + Quick Actions */}
+        <div className="flex items-center justify-between">
+          <h1 id="search-sheet-title" className="text-base font-bold text-neutral-900 leading-none">
             记入{mealName}
           </h1>
-          <p className="text-[11px] text-neutral-400">选择或搜索食物以记录份量</p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onCreateCustom(query.trim())}
+              aria-label="新建自定义食物或菜肴"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-800 hover:text-black bg-[#F5F5F5] hover:bg-neutral-200 px-3 py-1.5 rounded-full transition-colors min-h-[36px]"
+            >
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" strokeWidth={2.5} />
+              <span>自建食物</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="关闭搜索页面"
+              className="text-neutral-500 hover:text-black min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors -mr-2"
+            >
+              <X className="w-5 h-5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="关闭搜索页面"
-          className="text-neutral-500 hover:text-black min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors -mr-2"
-        >
-          <X className="w-5 h-5" aria-hidden="true" />
-        </button>
-      </header>
-
-      {/* Search Input & Action Row */}
-      <div className="p-4 bg-white border-b border-[#E0E0E0] space-y-3 shrink-0">
+        {/* Search Input */}
         <div className="relative flex items-center">
-          <div className="absolute left-3.5 text-neutral-400 pointer-events-none">
+          <div className="absolute left-3 text-neutral-400 pointer-events-none">
             <Search className="w-4 h-4" aria-hidden="true" />
           </div>
 
@@ -101,8 +111,8 @@ export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="搜索食物、菜肴名（如：鸡胸肉、燕麦、自建菜）..."
-            className="w-full h-11 pl-10 pr-10 bg-[#FAFAFA] card-border rounded-full text-xs text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-2 focus-visible:outline-black"
+            placeholder="搜索食物或菜肴（如：鸡胸肉、燕麦）..."
+            className="w-full h-10 pl-9 pr-9 bg-[#FAFAFA] card-border rounded-lg text-base sm:text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-black focus:outline-none focus:ring-0 transition-colors"
           />
 
           {query && (
@@ -113,54 +123,42 @@ export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
                 searchInputRef.current?.focus();
               }}
               aria-label="清空搜索框"
-              className="absolute right-2 text-neutral-400 hover:text-neutral-800 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-full"
+              className="absolute right-1.5 text-neutral-400 hover:text-neutral-800 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-full"
             >
-              <X className="w-4 h-4" aria-hidden="true" />
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           )}
         </div>
 
-        {/* Filter Pills & Create Food Button */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5" role="group" aria-label="数据来源过滤">
-            <button
-              type="button"
-              onClick={() => setFilterType('all')}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[36px] ${
-                filterType === 'all'
-                  ? 'bg-black text-white'
-                  : 'bg-neutral-100 text-neutral-600 hover:text-black'
-              }`}
-            >
-              全部 ({foods.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterType('custom')}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[36px] ${
-                filterType === 'custom'
-                  ? 'bg-black text-white'
-                  : 'bg-neutral-100 text-neutral-600 hover:text-black'
-              }`}
-            >
-              我的私房 ({customFoodsCount})
-            </button>
-          </div>
-
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2" role="group" aria-label="数据来源过滤">
           <button
             type="button"
-            onClick={() => onCreateCustom(query.trim())}
-            aria-label="新建自定义食物或菜肴"
-            className="inline-flex items-center gap-1 text-xs font-bold text-neutral-900 hover:text-black bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-full transition-colors min-h-[36px]"
+            onClick={() => setFilterType('all')}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[32px] ${
+              filterType === 'all'
+                ? 'bg-black text-white'
+                : 'bg-[#F5F5F5] text-neutral-600 hover:text-black'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" aria-hidden="true" strokeWidth={2.5} />
-            <span>自建食物</span>
+            全部 <span className="tabular-nums">({foods.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType('custom')}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[32px] ${
+              filterType === 'custom'
+                ? 'bg-black text-white'
+                : 'bg-[#F5F5F5] text-neutral-600 hover:text-black'
+            }`}
+          >
+            我的私房 <span className="tabular-nums">({customFoodsCount})</span>
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Food Results List */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-2" role="region" aria-label="食物候选列表">
+      <main className="flex-1 overflow-y-auto p-4 space-y-2.5" role="region" aria-label="食物候选列表">
         {filteredFoods.length === 0 ? (
           <div className="text-center py-12 px-4 space-y-4">
             <div className="w-12 h-12 mx-auto rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400">
@@ -185,66 +183,68 @@ export const FoodSearchSheet: React.FC<FoodSearchSheetProps> = ({
             </button>
           </div>
         ) : (
-          filteredFoods.map(food => (
-            <div
-              key={food.id}
-              className="w-full bg-white card-border rounded-xl p-3 hover:border-black transition-all flex items-center justify-between group"
-            >
-              <button
-                type="button"
-                onClick={() => onSelectFood(food)}
-                className="text-left flex-1 min-w-0 pr-2 py-0.5 focus-visible:outline-2 focus-visible:outline-black rounded"
-                aria-label={`选择${food.name}，热量${food.nutrition.calories}千卡`}
+          filteredFoods.map(food => {
+            const calPer100g = Math.round((food.nutrition.calories / (food.defaultGrams || 100)) * 100);
+            return (
+              <div
+                key={food.id}
+                className="w-full bg-white card-border rounded-xl p-3 hover:border-black transition-all flex items-center justify-between group"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-neutral-900 group-hover:text-black truncate">
-                      {food.name}
-                    </span>
-                    {food.source === 'custom' && (
-                      <span className="text-[10px] font-medium bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded">
-                        私房
+                <button
+                  type="button"
+                  onClick={() => onSelectFood(food)}
+                  className="text-left flex-1 min-w-0 pr-2 py-0.5 focus-visible:outline-2 focus-visible:outline-black rounded"
+                  aria-label={`选择${food.name}，${calPer100g}千卡/100g`}
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-bold text-neutral-900 group-hover:text-black truncate">
+                        {food.name}
                       </span>
-                    )}
-                    {food.steps && food.steps.length > 0 && (
-                      <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
-                        含做法
-                      </span>
-                    )}
+                      {food.source === 'custom' && (
+                        <span className="text-[10px] font-medium bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded">
+                          私房
+                        </span>
+                      )}
+                      {food.steps && food.steps.length > 0 && (
+                        <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                          含做法
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="text-xs text-neutral-400 tabular-nums">
+                      {calPer100g}千卡/100g
+                    </div>
                   </div>
+                </button>
 
-                  <div className="text-xs text-neutral-400">
-                    每 {food.defaultGrams}g：蛋白 {food.nutrition.protein}g · 碳水 {food.nutrition.carbs}g · 脂肪 {food.nutrition.fat}g
-                  </div>
-                </div>
-              </button>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="text-right">
-                  <span className="text-sm font-bold text-neutral-950 block">
-                    {food.nutrition.calories}{' '}
-                    <span className="text-[11px] font-normal text-neutral-400">千卡</span>
-                  </span>
-                  <span className="text-[11px] text-neutral-400 block mt-0.5">
-                    每份 {food.defaultGrams}g
-                  </span>
-                </div>
-
-                {food.source === 'custom' && onEditCustom && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {food.source === 'custom' && onEditCustom && (
+                    <button
+                      type="button"
+                      onClick={() => onEditCustom(food)}
+                      aria-label={`编辑私房食物「${food.name}」`}
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center text-neutral-400 hover:text-black hover:bg-neutral-100 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-black"
+                    >
+                      <Edit2 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => onEditCustom(food)}
-                    aria-label={`编辑私房食物「${food.name}」`}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-neutral-400 hover:text-black hover:bg-neutral-100 rounded-lg transition-colors ml-1 focus-visible:outline-2 focus-visible:outline-black"
+                    onClick={() => onSelectFood(food)}
+                    aria-label={`选择${food.name}`}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-neutral-400 group-hover:text-black hover:bg-neutral-100 rounded-lg transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" aria-hidden="true" />
+                    <Plus className="w-4 h-4" aria-hidden="true" strokeWidth={2.5} />
                   </button>
-                )}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </main>
+      </div>
     </div>
   );
 };

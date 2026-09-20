@@ -1,4 +1,4 @@
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = string;
 
 export type FoodSource = 'official' | 'custom';
 

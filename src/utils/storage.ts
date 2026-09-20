@@ -125,7 +125,7 @@ export function getDailyLogs(dateStr: string): LogEntry[] {
             carbs: Number(item.nutrition?.carbs) || 0,
             fat: Number(item.nutrition?.fat) || 0,
           },
-          mealType: (item.mealType as MealType) || 'lunch',
+          mealType: (item.mealType as MealType) || 'meal_1',
           date: item.date || dateStr,
         };
       }
@@ -143,7 +143,7 @@ export function getDailyLogs(dateStr: string): LogEntry[] {
           carbs: Number(item.carbs ?? item.nutrition?.carbs) || 0,
           fat: Number(item.fat ?? item.nutrition?.fat) || 0,
         },
-        mealType: (item.mealType as MealType) || 'lunch',
+        mealType: (item.mealType as MealType) || 'meal_1',
         date: item.date || dateStr,
       };
     });

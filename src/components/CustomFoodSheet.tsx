@@ -50,9 +50,6 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
         setFatStr('');
         setSteps([]);
       }
-      setTimeout(() => {
-        nameInputRef.current?.focus();
-      }, 50);
     }
   }, [isOpen, initialName, initialFood]);
 
@@ -171,33 +168,32 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="custom-food-title"
-      className="fixed inset-0 z-50 bg-[#FAFAFA] flex flex-col max-w-xl mx-auto overflow-y-auto"
+      className="fixed inset-0 z-50 bg-[#FAFAFA] flex flex-col max-w-xl mx-auto overflow-y-auto animate-sheet-up"
     >
-      {/* Top Bar */}
-      <header className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-[#E0E0E0] px-4 py-3 flex items-center justify-between">
+      {/* Top Bar (no bottom border, distinguished by pure white vs #FAFAFA background) */}
+      <header className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm px-3 h-12 flex items-center justify-between shrink-0">
         <button
           type="button"
           onClick={handleSafeBack}
-          aria-label="返回食物搜索"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-600 hover:text-black py-2 px-2 -ml-2 rounded-lg transition-colors min-h-[44px] min-w-[44px]"
+          aria-label="返回"
+          className="inline-flex items-center justify-center text-neutral-600 hover:text-black p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] -ml-1"
         >
-          <ChevronLeft className="w-4 h-4" aria-hidden="true" strokeWidth={2.5} />
-          <span>返回搜索</span>
+          <ChevronLeft className="w-5 h-5" aria-hidden="true" strokeWidth={2} />
         </button>
 
-        <h1 id="custom-food-title" className="text-sm font-bold text-neutral-900">
+        <h1 id="custom-food-title" className="text-sm font-bold text-neutral-900 leading-none">
           {pageTitle}
         </h1>
 
-        <div className="w-16 flex justify-end">
+        <div className="flex items-center justify-end">
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isSaveDisabled}
-            className={`text-xs font-bold py-2 px-2 min-h-[44px] flex items-center transition-colors ${
+            className={`text-xs font-bold px-3 py-1.5 min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
               isSaveDisabled
                 ? 'text-neutral-300 cursor-not-allowed'
-                : 'text-black hover:text-neutral-700 cursor-pointer'
+                : 'text-black hover:bg-neutral-100 cursor-pointer'
             }`}
           >
             保存
@@ -209,10 +205,10 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
       <main className="p-4 space-y-4 max-w-lg mx-auto w-full">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Card 1: 基础属性 */}
-          <section className="bg-white card-border rounded-xl p-4 space-y-3.5" aria-label="食物基础信息">
+          <section className="bg-white card-border rounded-xl p-4 space-y-4" aria-label="食物基础信息">
             <h2 className="text-xs font-bold text-neutral-900">基础信息</h2>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label htmlFor="custom-food-name" className="block text-xs font-medium text-neutral-600">
                 食物或菜品名称 <span className="text-neutral-400">*</span>
               </label>
@@ -224,11 +220,11 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                 onChange={e => setName(e.target.value)}
                 placeholder="如：香煎巴沙鱼柳、低脂香蕉燕麦饼"
                 required
-                className="w-full h-11 px-3 bg-white card-border rounded-lg text-sm text-neutral-950 placeholder:text-neutral-400 focus-visible:outline-2 focus-visible:outline-black"
+                className="w-full h-11 px-3 bg-white card-border rounded-lg text-sm text-neutral-950 placeholder:text-neutral-400 focus:border-black focus:outline-none focus:ring-0 transition-colors"
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label htmlFor="custom-food-grams" className="block text-xs font-medium text-neutral-600">
                 单份参考克重 (g) <span className="text-neutral-400">*</span>
               </label>
@@ -241,7 +237,7 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                   value={defaultGrams}
                   onChange={e => setDefaultGrams(Number(e.target.value))}
                   required
-                  className="w-full h-11 px-3 bg-white card-border rounded-lg text-sm text-neutral-950 focus-visible:outline-2 focus-visible:outline-black"
+                  className="w-full h-11 px-3 bg-white card-border rounded-lg text-sm text-neutral-950 focus:border-black focus:outline-none focus:ring-0 transition-colors"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">
                   克 / 份
@@ -253,23 +249,23 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
             </div>
           </section>
 
-          {/* Card 2: 单份营养含量（纯白卡片，divide-[#E0E0E0] 分隔，无阴影） */}
+          {/* Card 2: 单份营养含量（纯白卡片，通过呼吸留白组织层级，无分割线） */}
           <section
-            className="bg-white card-border rounded-xl p-4 divide-y divide-[#E0E0E0] space-y-3.5"
+            className="bg-white card-border rounded-xl p-4 space-y-4"
             aria-label="营养成分参考"
           >
             <div>
               <h2 className="text-xs font-bold text-neutral-900">单份营养成分</h2>
-              <p className="text-[11px] text-neutral-400 mt-0.5">
+              <p className="text-[11px] text-neutral-400 mt-1">
                 填写每 {defaultGrams || 100}g 的营养素含量
               </p>
             </div>
 
             {/* 热量静态展示行：只读派生值 */}
-            <div className="pt-3.5 space-y-1">
+            <div className="space-y-1">
               <div className="flex items-baseline justify-between">
                 <span className="text-xs font-medium text-neutral-700">热量</span>
-                <span className="text-base font-bold text-neutral-950">
+                <span className="text-base font-bold text-neutral-950 tabular-nums">
                   {calories > 0 ? `${calories} 千卡` : '—'}
                 </span>
               </div>
@@ -279,9 +275,9 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
             </div>
 
             {/* 三大营养素输入：inputMode="decimal" 与正则限制 */}
-            <div className="pt-3.5">
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="space-y-1">
+            <div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1.5">
                   <label htmlFor="custom-food-protein" className="block text-xs font-medium text-neutral-600">
                     蛋白质 (g)
                   </label>
@@ -293,11 +289,11 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                     placeholder="0"
                     value={proteinStr}
                     onChange={e => handleProteinChange(e.target.value)}
-                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 focus-visible:outline-2 focus-visible:outline-black"
+                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 tabular-nums focus:border-black focus:outline-none focus:ring-0 transition-colors"
                   />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label htmlFor="custom-food-carbs" className="block text-xs font-medium text-neutral-600">
                     碳水 (g)
                   </label>
@@ -309,11 +305,11 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                     placeholder="0"
                     value={carbsStr}
                     onChange={e => handleCarbsChange(e.target.value)}
-                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 focus-visible:outline-2 focus-visible:outline-black"
+                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 tabular-nums focus:border-black focus:outline-none focus:ring-0 transition-colors"
                   />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label htmlFor="custom-food-fat" className="block text-xs font-medium text-neutral-600">
                     脂肪 (g)
                   </label>
@@ -325,7 +321,7 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                     placeholder="0"
                     value={fatStr}
                     onChange={e => handleFatChange(e.target.value)}
-                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 focus-visible:outline-2 focus-visible:outline-black"
+                    className="w-full h-10 px-2.5 bg-white card-border rounded-lg text-sm text-neutral-950 tabular-nums focus:border-black focus:outline-none focus:ring-0 transition-colors"
                   />
                 </div>
               </div>
@@ -333,11 +329,11 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
           </section>
 
           {/* Card 3: 烹饪制作步骤 (可选) */}
-          <section className="bg-white card-border rounded-xl p-4 space-y-3" aria-label="制作做法模块">
+          <section className="bg-white card-border rounded-xl p-4 space-y-4" aria-label="制作做法模块">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xs font-bold text-neutral-900">烹饪步骤 (可选)</h2>
-                <p className="text-[11px] text-neutral-400 mt-0.5">
+                <p className="text-[11px] text-neutral-400 mt-1">
                   若是自己常做的特色私房菜，可在此记录烹饪秘诀
                 </p>
               </div>
@@ -346,7 +342,7 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                 type="button"
                 onClick={handleAddStep}
                 aria-label="新增一个烹饪步骤"
-                className="text-xs font-semibold text-neutral-900 hover:text-black bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-lg transition-colors min-h-[44px] flex items-center gap-1"
+                className="text-xs font-semibold text-neutral-900 hover:text-black bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-lg transition-colors min-h-[44px] flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" aria-hidden="true" strokeWidth={2.5} />
                 <span>加步骤</span>
@@ -354,14 +350,14 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
             </div>
 
             {steps.length === 0 ? (
-              <div className="text-center py-4 text-xs text-neutral-400 border border-dashed border-[#E0E0E0] rounded-lg">
+              <div className="text-center py-4 px-3 text-xs text-neutral-400 bg-neutral-50 rounded-lg">
                 暂未添加步骤，如需备忘可点击上方按钮添加
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {steps.map((stepText, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <span className="shrink-0 w-6 h-10 flex items-center justify-center text-xs font-semibold text-neutral-400">
+                    <span className="shrink-0 w-6 h-10 flex items-center justify-center text-xs font-semibold text-neutral-400 tabular-nums">
                       {idx + 1}.
                     </span>
                     <textarea
@@ -370,13 +366,13 @@ export const CustomFoodSheet: React.FC<CustomFoodSheetProps> = ({
                       onChange={e => handleUpdateStep(idx, e.target.value)}
                       placeholder={`步骤 ${idx + 1} 具体操作...`}
                       aria-label={`第 ${idx + 1} 步烹饪说明`}
-                      className="flex-1 p-2.5 bg-white card-border rounded-lg text-xs text-neutral-900 focus-visible:outline-2 focus-visible:outline-black resize-none"
+                      className="flex-1 p-2.5 bg-white card-border rounded-lg text-xs text-neutral-900 focus:border-black focus:outline-none focus:ring-0 transition-colors resize-none"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveStep(idx)}
                       aria-label={`移除第 ${idx + 1} 步`}
-                      className="text-neutral-400 hover:text-red-500 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors"
+                      className="text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-black"
                     >
                       <X className="w-4 h-4" aria-hidden="true" />
                     </button>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Food, LogEntry, DailyTargets, MealType } from './types';
+import { getMealName } from './utils/mealUtils';
 import {
   getAllFoods,
   saveCustomFood,
@@ -30,7 +31,7 @@ export default function App() {
   const [allFoods, setAllFoods] = useState<Food[]>([]);
 
   // Sheet Layer Navigation States
-  const [activeMealType, setActiveMealType] = useState<MealType>('lunch');
+  const [activeMealType, setActiveMealType] = useState<MealType>('meal_1');
   const [activeSheet, setActiveSheet] = useState<SheetType>(null);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [createFoodPrefillName, setCreateFoodPrefillName] = useState<string>('');
@@ -55,6 +56,23 @@ export default function App() {
   // Reload logs on date change
   useEffect(() => {
     setDailyLogs(getDailyLogs(currentDate));
+  }, [currentDate]);
+
+  // Dynamic Page Title Narrative
+  const pageTitle = useMemo(() => {
+    const today = getTodayDateString();
+    if (currentDate === today) {
+      return '今日饮食';
+    }
+    const parts = currentDate.split('-');
+    if (parts.length === 3) {
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(month) && !isNaN(day)) {
+        return `${month}月${day}日 饮食`;
+      }
+    }
+    return `${currentDate} 饮食`;
   }, [currentDate]);
 
   // Prevent background scroll when any sheet is open
@@ -157,7 +175,7 @@ export default function App() {
     setDailyLogs(updated);
     setActiveSheet(null);
     setSelectedFood(null);
-    showNotice(`已记入饮食：${entry.foodName} (${entry.grams}克)`);
+    showNotice(`已记入${getMealName(entry.mealType)}：${entry.foodName} (${entry.grams}g)`);
   };
 
   // Delete log entry with Undo
@@ -225,15 +243,15 @@ export default function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2.5 rounded-full z-50 flex items-center gap-3 animate-fadeIn"
+          className="fixed bottom-[calc(1.5rem+var(--sab))] left-1/2 -translate-x-1/2 bg-black text-white text-xs pl-4 pr-2 py-1 rounded-full z-50 flex items-center gap-1.5 animate-fadeIn max-w-[90vw]"
         >
-          <span>{toast.message}</span>
+          <span className="truncate">{toast.message}</span>
           {toast.onUndo && (
             <button
               type="button"
               onClick={toast.onUndo}
               aria-label="撤销删除"
-              className="text-white font-bold underline hover:text-neutral-300 transition-colors ml-1"
+              className="text-white font-bold underline hover:text-neutral-300 transition-colors min-h-[44px] min-w-[44px] px-2 flex items-center justify-center shrink-0"
             >
               撤销
             </button>
@@ -242,10 +260,10 @@ export default function App() {
       )}
 
       {/* Main Single-View Container */}
-      <main id="main-content" className="max-w-xl mx-auto px-4 pt-5 pb-16">
-        <header className="mb-4">
-          <h1 className="text-xl font-bold tracking-tight text-neutral-950">
-            今日饮食
+      <main id="main-content" className="max-w-xl mx-auto px-4 pt-4 pb-[calc(4rem+var(--sab))] space-y-4">
+        <header>
+          <h1 className="text-lg font-bold tracking-tight text-neutral-950 leading-none">
+            {pageTitle}
           </h1>
         </header>
 
