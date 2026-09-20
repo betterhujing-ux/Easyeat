@@ -1,102 +1,218 @@
-import React, { useState, useEffect } from 'react';
-import { Recipe, LoggedItem, DailyTargets } from './types';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Food, LogEntry, DailyTargets, MealType } from './types';
 import {
-  getAllRecipes,
-  saveCustomRecipe,
-  deleteCustomRecipe,
+  getAllFoods,
+  saveCustomFood,
   getTodayDateString,
   getDailyLogs,
-  addLogItem,
-  removeLogItem,
+  saveDailyLogs,
+  addLogEntry,
+  removeLogEntry,
   getDailyTargets,
 } from './utils/storage';
-import { Navigation, NavTab } from './components/Navigation';
-import { RecipeList } from './components/RecipeList';
-import { RecipeDetail } from './components/RecipeDetail';
-import { RecipeEditor } from './components/RecipeEditor';
 import { DietTracker } from './components/DietTracker';
+import { FoodSearchSheet } from './components/FoodSearchSheet';
+import { CustomFoodSheet } from './components/CustomFoodSheet';
+import { PortionConfirmSheet } from './components/PortionConfirmSheet';
+
+type SheetType = 'search' | 'create' | 'portion' | null;
+
+interface ToastState {
+  message: string;
+  onUndo?: () => void;
+}
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('tracker');
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
-  const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
-
-  // Diet Tracker States
+  // Main Data States
   const [currentDate, setCurrentDate] = useState<string>(getTodayDateString());
-  const [dailyLogs, setDailyLogs] = useState<LoggedItem[]>([]);
+  const [dailyLogs, setDailyLogs] = useState<LogEntry[]>([]);
   const [dailyTargets, setDailyTargets] = useState<DailyTargets>(getDailyTargets());
-  const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+  const [allFoods, setAllFoods] = useState<Food[]>([]);
+
+  // Sheet Layer Navigation States
+  const [activeMealType, setActiveMealType] = useState<MealType>('lunch');
+  const [activeSheet, setActiveSheet] = useState<SheetType>(null);
+  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [createFoodPrefillName, setCreateFoodPrefillName] = useState<string>('');
+  const [editingCustomFood, setEditingCustomFood] = useState<Food | null>(null);
+
+  // Toast with Undo
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingDeletedRef = useRef<{
+    date: string;
+    item: LogEntry;
+    index: number;
+  } | null>(null);
 
   // Initialize
   useEffect(() => {
-    setRecipes(getAllRecipes());
+    setAllFoods(getAllFoods());
     setDailyLogs(getDailyLogs(currentDate));
     setDailyTargets(getDailyTargets());
   }, []);
 
-  // Reload logs when date changes
+  // Reload logs on date change
   useEffect(() => {
     setDailyLogs(getDailyLogs(currentDate));
   }, [currentDate]);
 
-  const showToast = (msg: string) => {
-    setBannerNotice(msg);
-    setTimeout(() => {
-      setBannerNotice(null);
-    }, 2500);
-  };
-
-  // Recipe actions
-  const handleSelectRecipe = (recipe: Recipe) => {
-    setActiveRecipe(recipe);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToRecipeList = () => {
-    setActiveRecipe(null);
-    setIsCreatingRecipe(false);
-  };
-
-  const handleSaveNewRecipe = (newRecipe: Recipe) => {
-    saveCustomRecipe(newRecipe);
-    setRecipes(getAllRecipes());
-    setIsCreatingRecipe(false);
-    setActiveRecipe(newRecipe);
-    showToast(`已为你保存好《${newRecipe.title}》`);
-  };
-
-  const handleDeleteCustomRecipe = (id: string) => {
-    deleteCustomRecipe(id);
-    setRecipes(getAllRecipes());
-    setActiveRecipe(null);
-    showToast('已移除该食谱');
-  };
-
-  // Tracker actions
-  const handleAddLogItem = (item: LoggedItem) => {
-    const updated = addLogItem(currentDate, item);
-    setDailyLogs(updated);
-    showToast(`已记入今日饮食：${item.name} (${item.amount}克)`);
-  };
-
-  const handleDeleteLogItem = (id: string) => {
-    const updated = removeLogItem(currentDate, id);
-    setDailyLogs(updated);
-  };
-
-  const handleTabChange = (tab: NavTab) => {
-    setCurrentTab(tab);
-    if (tab !== 'recipes') {
-      setActiveRecipe(null);
-      setIsCreatingRecipe(false);
+  // Prevent background scroll when any sheet is open
+  useEffect(() => {
+    if (activeSheet !== null) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeSheet]);
+
+  // Clean timer on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Regular toast notification
+  const showNotice = useCallback((msg: string) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    pendingDeletedRef.current = null;
+    setToast({ message: msg });
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+    }, 2500);
+  }, []);
+
+  // Esc key closes top layer
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+
+      if (activeSheet === 'create') {
+        // Handled in CustomFoodSheet or fallback to search
+        setActiveSheet('search');
+      } else if (activeSheet === 'portion') {
+        // Return to search
+        setActiveSheet('search');
+      } else if (activeSheet === 'search') {
+        // Return to main view
+        setActiveSheet(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [activeSheet]);
+
+  // Start recording flow from meal card
+  const handleOpenRecordFlow = (meal: MealType) => {
+    setActiveMealType(meal);
+    setSelectedFood(null);
+    setCreateFoodPrefillName('');
+    setActiveSheet('search');
+  };
+
+  // Selecting a food from Sheet 1 -> Opens Sheet 3 (份量确认)
+  const handleSelectFoodFromSearch = (food: Food) => {
+    setSelectedFood(food);
+    setActiveSheet('portion');
+  };
+
+  // Triggering custom food creation from Sheet 1 -> Opens Sheet 2 (自建食物)
+  const handleStartCreateCustom = (prefillName = '') => {
+    setEditingCustomFood(null);
+    setCreateFoodPrefillName(prefillName);
+    setActiveSheet('create');
+  };
+
+  // Editing existing custom food
+  const handleEditCustomFood = (food: Food) => {
+    setEditingCustomFood(food);
+    setCreateFoodPrefillName(food.name);
+    setActiveSheet('create');
+  };
+
+  // Saving custom food in Sheet 2 -> Saves and immediately proceeds to Sheet 3 (份量确认)
+  const handleCustomFoodSaved = (newFood: Food) => {
+    const isEditing = Boolean(editingCustomFood);
+    const updatedFoods = saveCustomFood(newFood);
+    setAllFoods(updatedFoods);
+    setEditingCustomFood(null);
+    setSelectedFood(newFood);
+    setActiveSheet('portion');
+    showNotice(isEditing ? `已更新自建食物「${newFood.name}」` : `已建立自建食物「${newFood.name}」`);
+  };
+
+  // Confirming portion in Sheet 3 -> Saves log entry and returns to main view
+  const handleConfirmLogEntry = (entry: LogEntry) => {
+    const updated = addLogEntry(currentDate, entry);
+    setDailyLogs(updated);
+    setActiveSheet(null);
+    setSelectedFood(null);
+    showNotice(`已记入饮食：${entry.foodName} (${entry.grams}克)`);
+  };
+
+  // Delete log entry with Undo
+  const handleDeleteLogItem = (id: string) => {
+    const itemIndex = dailyLogs.findIndex(i => i.id === id);
+    const itemToDelete = dailyLogs[itemIndex];
+    if (!itemToDelete) return;
+
+    const updated = removeLogEntry(currentDate, id);
+    setDailyLogs(updated);
+
+    pendingDeletedRef.current = {
+      date: currentDate,
+      item: itemToDelete,
+      index: itemIndex,
+    };
+
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    const handleUndo = () => {
+      const pending = pendingDeletedRef.current;
+      if (!pending) return;
+
+      const currentLogs = getDailyLogs(pending.date);
+      const restored = [...currentLogs];
+      restored.splice(pending.index, 0, pending.item);
+      saveDailyLogs(pending.date, restored);
+
+      if (pending.date === currentDate) {
+        setDailyLogs(restored);
+      }
+
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+      pendingDeletedRef.current = null;
+      setToast(null);
+    };
+
+    setToast({
+      message: `已删除「${itemToDelete.foodName}」`,
+      onUndo: handleUndo,
+    });
+
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+      pendingDeletedRef.current = null;
+    }, 5000);
   };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-neutral-900 font-sans antialiased">
-      {/* Skip to Main Content Link for Keyboard Accessibility (Front-End Checklist) */}
+      {/* Skip to Main Content Link for Keyboard Accessibility */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:bg-black focus:text-white focus:text-xs focus:rounded-lg"
@@ -105,68 +221,80 @@ export default function App() {
       </a>
 
       {/* Toast Notice */}
-      {bannerNotice && (
+      {toast && (
         <div
           role="status"
           aria-live="polite"
-          className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-xs font-semibold px-4 py-2 rounded-full border border-neutral-800 transition-all animate-fadeIn"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2.5 rounded-full z-50 flex items-center gap-3 animate-fadeIn"
         >
-          {bannerNotice}
+          <span>{toast.message}</span>
+          {toast.onUndo && (
+            <button
+              type="button"
+              onClick={toast.onUndo}
+              aria-label="撤销删除"
+              className="text-white font-bold underline hover:text-neutral-300 transition-colors ml-1"
+            >
+              撤销
+            </button>
+          )}
         </div>
       )}
 
-      {/* Main Container */}
-      <main id="main-content" className="max-w-xl mx-auto px-4 pt-5 pb-24">
-        {/* App Header (Shows unless deeply reading recipe detail) */}
-        {!activeRecipe && !isCreatingRecipe && (
-          <header className="mb-4">
-            <h1 className="text-xl font-bold tracking-tight text-neutral-950">
-              {currentTab === 'tracker' && '饮食记录'}
-              {currentTab === 'recipes' && '健康食谱'}
-            </h1>
-          </header>
-        )}
+      {/* Main Single-View Container */}
+      <main id="main-content" className="max-w-xl mx-auto px-4 pt-5 pb-16">
+        <header className="mb-4">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-950">
+            今日饮食
+          </h1>
+        </header>
 
-        {/* Dynamic Views: 记录页为主页面 */}
-        {currentTab === 'tracker' && (
-          <div id="tracker-tab-panel" role="tabpanel" aria-labelledby="nav-tab-tracker">
-            <DietTracker
-              currentDate={currentDate}
-              logs={dailyLogs}
-              targets={dailyTargets}
-              onDateChange={setCurrentDate}
-              onAddLog={handleAddLogItem}
-              onDeleteLog={handleDeleteLogItem}
-            />
-          </div>
-        )}
-
-        {currentTab === 'recipes' && (
-          <div id="recipes-tab-panel" role="tabpanel" aria-labelledby="nav-tab-recipes">
-            {isCreatingRecipe ? (
-              <RecipeEditor
-                onSave={handleSaveNewRecipe}
-                onCancel={handleBackToRecipeList}
-              />
-            ) : activeRecipe ? (
-              <RecipeDetail
-                recipe={activeRecipe}
-                onBack={handleBackToRecipeList}
-                onDeleteCustom={handleDeleteCustomRecipe}
-              />
-            ) : (
-              <RecipeList
-                recipes={recipes}
-                onSelectRecipe={handleSelectRecipe}
-                onCreateNew={() => setIsCreatingRecipe(true)}
-              />
-            )}
-          </div>
-        )}
+        {/* Main View: Diet Tracker */}
+        <DietTracker
+          currentDate={currentDate}
+          logs={dailyLogs}
+          targets={dailyTargets}
+          onDateChange={setCurrentDate}
+          onOpenRecord={handleOpenRecordFlow}
+          onDeleteLog={handleDeleteLogItem}
+        />
       </main>
 
-      {/* Apple HIG compliant Bottom Navigation */}
-      <Navigation currentTab={currentTab} onTabChange={handleTabChange} />
+      {/* Sheet 1: 食物搜索（全屏） */}
+      <FoodSearchSheet
+        isOpen={activeSheet === 'search'}
+        mealType={activeMealType}
+        dateStr={currentDate}
+        foods={allFoods}
+        onSelectFood={handleSelectFoodFromSearch}
+        onCreateCustom={handleStartCreateCustom}
+        onEditCustom={handleEditCustomFood}
+        onClose={() => setActiveSheet(null)}
+      />
+
+      {/* Sheet 2: 自建食物表单（全屏，在 Sheet 1 之上） */}
+      <CustomFoodSheet
+        isOpen={activeSheet === 'create'}
+        initialName={createFoodPrefillName}
+        initialFood={editingCustomFood}
+        onBack={() => {
+          setActiveSheet('search');
+          setEditingCustomFood(null);
+        }}
+        onSaved={handleCustomFoodSaved}
+        onNotify={showNotice}
+      />
+
+      {/* Sheet 3: 份量确认（半屏） */}
+      <PortionConfirmSheet
+        isOpen={activeSheet === 'portion'}
+        food={selectedFood}
+        mealType={activeMealType}
+        dateStr={currentDate}
+        onConfirm={handleConfirmLogEntry}
+        onBack={() => setActiveSheet('search')}
+        onClose={() => setActiveSheet(null)}
+      />
     </div>
   );
 }

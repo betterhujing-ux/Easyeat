@@ -1,56 +1,30 @@
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export interface FoodItem {
-  id: string;
+export type FoodSource = 'official' | 'custom';
+
+export interface Food {
+  id: string;                  // crypto.randomUUID()
   name: string;
-  category: string;
-  cal: number;       // kcal per 100g
-  protein: number;   // g per 100g
-  fat: number;       // g per 100g
-  carbs: number;     // g per 100g
-  servingDesc?: string; // e.g. "中等个约 50g"
+  source: FoodSource;
+  defaultGrams: number;        // 每份克重，> 0
+  nutrition: {
+    calories: number;          // kcal
+    protein: number;           // g
+    carbs: number;             // g
+    fat: number;               // g
+  };
+  steps: string[];             // 烹饪步骤，可为空数组
+  createdAt: number;
 }
 
-export interface LoggedItem {
+export interface LogEntry {
   id: string;
   foodId: string;
-  name: string;
-  amount: number;    // in grams
-  cal: number;
-  protein: number;
-  fat: number;
-  carbs: number;
+  foodName: string;            // 快照，防食物被删后历史失真
+  grams: number;
+  nutrition: Food['nutrition'];// 快照 = 单份值 × grams/defaultGrams
   mealType: MealType;
-  loggedAt: string;  // ISO string
-}
-
-export interface Ingredient {
-  name: string;
-  amount: number;    // grams or count
-  unit: string;      // g, ml, 个, 勺, etc.
-  cal?: number;
-  protein?: number;
-  fat?: number;
-  carbs?: number;
-}
-
-export interface Recipe {
-  id: string;
-  title: string;
-  summary: string;
-  category: string;
-  prepMinutes: number;
-  difficulty: '简单' | '适中' | '进阶';
-  servings: number;
-  ingredients: Ingredient[];
-  steps: string[];
-  tips?: string;
-  isCustom?: boolean;
-  createdAt: string;
-  totalCal: number;
-  totalProtein: number;
-  totalFat: number;
-  totalCarbs: number;
+  date: string;                // YYYY-MM-DD
 }
 
 export interface DailyTargets {
